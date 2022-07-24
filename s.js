@@ -1,39 +1,79 @@
 var express = require('express');
 var app = express();
+var bodyParser = require('body-parser');
+var jsonParser = bodyParser.json();
+var db = require('./conn2');
 
-app.all("*", function (req, res, next) {
+
+app.all("*", (req, res, next) => {
+
 	//设置允许跨域的域名，*代表允许任意域名跨域
-	res.header("Access-Control-Allow-Origin", "*");
+	res.header("Access-Control-Allow-Origin", "http://localhost:3000");
 	//允许的header类型
-	res.header("Access-Contro1-Allow-Headers", "content-type");
+	res.header("Access-Control-Allow-Headers", "content-type");
 	//跨域允许的请求方式
-	res.header("Access-Control-Allow-Methods", "DELETE,PUT,POST,GET,OPTIONS");
-	if (req.method.toLowerCase() == 'options ')
-		res.send(200);//让options尝试请求快速结束else
-	next();
-})
+	res.header("Access-Control-Allow-Methods", "PUT,POST,GET,DELETE,OPTIONS");
+	res.header("Access-Control-Max-Age","1728000");
+	//res.setHeader("Content-Type", "application/json;charset=utf-8");
+	if (req.method == 'OPTIONS')
+        res.sendStatus(200);
+    else
+        next();
+      
+});
+
+// app.use(express.json);
+
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 
 app.get('/', function (req, res) {
    res.send('Hello World');
+});
+
+app.get('/u', (req, res) => {
+	db.get(req.query,(err,rez)=>{
+		res.send(rez[0]);
+	});
+});
+
+app.get('/u/all', (req, res) => {
+	db.getAll((err,rez)=>{
+		res.send(rez);
+	});
+});
+
+app.post('/u', (req, res) => {
+	db.add(req.body,(err,rez) => {
+		if(err){
+			console.log(err);
+			res.send('error');
+			return;
+		}
+		res.send('ok');
+	})
 })
 
-app.get('/a', function (req, res) {
-   res.send('Hello a');
+app.delete('/u',  (req, res) => {
+	db.del(req.query,(err,rez)=>{
+		if(err){
+			console.log(err);
+			res.send('error');
+			return;
+		}
+		res.send('ok');
+	});
 })
 
-app.post('/a', function (req, res) {
-	console.log('a')
-   res.send('Hello a师大、');
-})
-
-app.delete('/a', function (req, res) {
-	console.log('dela')
-   res.send('Hello de');
-})
-
-app.put('/a', function (req, res) {
-	console.log('pu')
-   res.send('Hello pu');
+app.put('/u',  (req, res) => {
+	db.update(req.body,(err,rez)=>{
+		if(err){
+			console.log(err);
+			res.send('error');
+			return;
+		}
+		res.send('ok');
+	});
 })
 
 var server = app.listen(8081, function () {
