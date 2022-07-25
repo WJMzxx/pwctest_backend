@@ -2,7 +2,7 @@ var express = require('express');
 var app = express();
 var bodyParser = require('body-parser');
 var jsonParser = bodyParser.json();
-var db = require('./conn2');
+var db = require('./connecter');
 
 
 app.all("*", (req, res, next) => {
